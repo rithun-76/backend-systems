@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NexBank — Banking Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --card: #181b22;
+    --border: #252830;
+    --border-glow: #3a6fff40;
+    --accent: #3a6fff;
+    --accent2: #00e5b0;
+    --danger: #ff4f4f;
+    --warn: #ffb341;
+    --text: #f0f2f8;
+    --muted: #7a8099;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo span {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  .logo span em {
+    color: var(--accent);
+    font-style: normal;
+  }
+
+  .logo small {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  nav { flex: 1; padding: 16px 12px; }
+
+  nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.18s;
+    margin-bottom: 4px;
+  }
+
+  nav a svg { width: 18px; height: 18px; flex-shrink: 0; }
+  nav a:hover { background: #ffffff08; color: var(--text); }
+  nav a.active { background: #3a6fff18; color: var(--accent); border: 1px solid #3a6fff28; }
+
+  .sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* MAIN */
+  main {
+    margin-left: 240px;
+    flex: 1;
+    padding: 40px;
+    max-width: calc(100% - 240px);
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page-header {
+    margin-bottom: 36px;
+  }
+
+  .page-header h1 {
+    font-family: var(--font-head);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .page-header p {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 6px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+
+  .card h2 {
+    font-family: var(--font-head);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  /* FORM */
+  .form-group { margin-bottom: 18px; }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+
+  .form-group input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .form-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px #3a6fff1a;
+  }
+
+  .form-group input::placeholder { color: var(--muted); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover { background: #295de6; transform: translateY(-1px); }
+
+  .btn-success {
+    background: #00e5b018;
+    color: var(--accent2);
+    border: 1px solid #00e5b030;
+  }
+
+  .btn-success:hover { background: #00e5b028; }
+
+  .btn-danger {
+    background: #ff4f4f18;
+    color: var(--danger);
+    border: 1px solid #ff4f4f30;
+  }
+
+  .btn-danger:hover { background: #ff4f4f28; }
+
+  .btn-full { width: 100%; justify-content: center; }
+
+  /* STAT CARDS */
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .stat-card .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .stat-card .value {
+    font-family: var(--font-head);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .stat-card .value.green { color: var(--accent2); }
+  .stat-card .value.blue { color: var(--accent); }
+  .stat-card .value.red { color: var(--danger); }
+
+  /* ALERT */
+  .alert {
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-top: 16px;
+    display: none;
+  }
+
+  .alert.success { background: #00e5b015; color: var(--accent2); border: 1px solid #00e5b030; display: block; }
+  .alert.error { background: #ff4f4f15; color: var(--danger); border: 1px solid #ff4f4f30; display: block; }
+
+  /* TRANSACTIONS TABLE */
+  .tx-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .tx-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+
+  .tx-table td {
+    padding: 13px 14px;
+    border-bottom: 1px solid #1a1d24;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .tx-table tr:last-child td { border-bottom: none; }
+  .tx-table tr:hover td { background: #ffffff04; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+
+  .badge.deposit { background: #00e5b018; color: var(--accent2); }
+  .badge.withdraw { background: #ff4f4f18; color: var(--danger); }
+
+  /* BALANCE DISPLAY */
+  .balance-big {
+    background: linear-gradient(135deg, #3a6fff18, #00e5b010);
+    border: 1px solid var(--border-glow);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .balance-big .acc { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+
+  .balance-big .amount {
+    font-family: var(--font-head);
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--accent2);
+    letter-spacing: -1px;
+  }
+
+  /* Dashboard quick stats */
+  .welcome-bar {
+    background: linear-gradient(135deg, #1a2540, #111318);
+    border: 1px solid var(--border-glow);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .welcome-bar h2 {
+    font-family: var(--font-head);
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .welcome-bar p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .quick-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .quick-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.18s;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: var(--font-body);
+    min-width: 80px;
+  }
+
+  .quick-btn svg { width: 22px; height: 22px; }
+  .quick-btn:hover { border-color: var(--accent); color: var(--accent); background: #3a6fff0a; }
+
+  .loading { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; }
+    .sidebar .logo span, .sidebar .logo small, nav a span, .sidebar-footer { display: none; }
+    main { margin-left: 60px; max-width: calc(100% - 60px); padding: 24px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <span>Nex<em>Bank</em></span>
+    <small>Digital Banking</small>
+  </div>
+  <nav>
+    <a class="active" onclick="showPage('dashboard')" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a onclick="showPage('create')" data-page="create">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><line x1="12" y1="3" x2="12" y2="5"/></svg>
+      <span>Create Account</span>
+    </a>
+    <a onclick="showPage('deposit')" data-page="deposit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+      <span>Deposit</span>
+    </a>
+    <a onclick="showPage('withdraw')" data-page="withdraw">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+      <span>Withdraw</span>
+    </a>
+    <a onclick="showPage('transfer')" data-page="transfer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M15 8l4 4-4 4M9 16l-4-4 4-4"/></svg>
+      <span>Transfer</span>
+    </a>
+    <a onclick="showPage('balance')" data-page="balance">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      <span>Balance</span>
+    </a>
+    <a onclick="showPage('transactions')" data-page="transactions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
+      <span>Transactions</span>
+    </a>
+    <a onclick="showPage('update')" data-page="update">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <span>Update Account</span>
+    </a>
+    <a onclick="showPage('delete')" data-page="delete">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      <span>Delete Account</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">NexBank v1.0</div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <p>Welcome back. Manage your banking operations.</p>
+    </div>
+    <div class="welcome-bar">
+      <div>
+        <h2>NexBank Portal</h2>
+        <p>Secure, fast, and reliable digital banking management system.</p>
+      </div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="showPage('deposit')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+          Deposit
+        </button>
+        <button class="quick-btn" onclick="showPage('withdraw')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+          Withdraw
+        </button>
+        <button class="quick-btn" onclick="showPage('transfer')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M15 8l4 4-4 4M9 16l-4-4 4-4"/></svg>
+          Transfer
+        </button>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="stat-card">
+        <div class="label">Quick Balance Check</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="dash-acc" type="number" placeholder="Account No." style="flex:1;background:#0a0c10;border:1px solid #252830;border-radius:8px;padding:10px 12px;color:#f0f2f8;font-size:14px;outline:none;"/>
+          <button class="btn btn-primary" style="padding:10px 16px;border-radius:8px" onclick="dashBalance()">Go</button>
+        </div>
+        <div class="value blue" id="dash-balance" style="margin-top:14px;font-size:32px">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">API Endpoint</div>
+        <div style="font-size:13px;color:#7a8099;margin-top:10px;word-break:break-all;font-family:monospace" id="api-url-display">http://localhost:5000</div>
+        <div style="margin-top:12px">
+          <input id="api-base-input" type="text" placeholder="Change base URL" style="width:100%;background:#0a0c10;border:1px solid #252830;border-radius:8px;padding:8px 10px;color:#f0f2f8;font-size:12px;outline:none;font-family:monospace"/>
+          <button class="btn btn-success" style="margin-top:8px;padding:8px 14px;font-size:12px" onclick="setApiUrl()">Update</button>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Available Operations</div>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:13px;color:#f0f2f8;display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;background:#00e5b0;border-radius:50%;display:inline-block"></span> Create / Update / Delete Account</div>
+          <div style="font-size:13px;color:#f0f2f8;display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;background:#3a6fff;border-radius:50%;display:inline-block"></span> Deposit / Withdraw / Transfer</div>
+          <div style="font-size:13px;color:#f0f2f8;display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;background:#ffb341;border-radius:50%;display:inline-block"></span> Balance Check / Statement</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE ACCOUNT -->
+  <div class="page" id="page-create">
+    <div class="page-header">
+      <h1>Create Account</h1>
+      <p>Open a new bank account by filling the form below.</p>
+    </div>
+    <div class="card" style="max-width:560px">
+      <h2>Account Details</h2>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Account Number</label>
+          <input type="number" id="c-accno" placeholder="e.g. 1001"/>
+        </div>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="c-name" placeholder="John Doe"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="c-address" placeholder="123 Main St, City"/>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="text" id="c-phone" placeholder="+91 99999 00000"/>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="c-email" placeholder="john@email.com"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Initial Balance (₹)</label>
+        <input type="number" id="c-balance" placeholder="0.00"/>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="createAccount()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Account
+      </button>
+      <div id="create-alert" class="alert"></div>
+    </div>
+  </div>
+
+  <!-- DEPOSIT -->
+  <div class="page" id="page-deposit">
+    <div class="page-header">
+      <h1>Deposit</h1>
+      <p>Add funds to an account.</p>
+    </div>
+    <div class="card" style="max-width:480px">
+      <h2>Deposit Funds</h2>
+      <div class="form-group">
+        <label>Account Number</label>
+        <input type="number" id="d-accno" placeholder="e.g. 1001"/>
+      </div>
+      <div class="form-group">
+        <label>Transaction ID</label>
+        <input type="number" id="d-transid" placeholder="Unique transaction ID"/>
+      </div>
+      <div class="form-group">
+        <label>Amount (₹)</label>
+        <input type="number" id="d-amount" placeholder="0.00"/>
+      </div>
+      <button class="btn btn-success btn-full" onclick="deposit()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+        Deposit Amount
+      </button>
+      <div id="deposit-alert" class="alert"></div>
+    </div>
+  </div>
+
+  <!-- WITHDRAW -->
+  <div class="page" id="page-withdraw">
+    <div class="page-header">
+      <h1>Withdraw</h1>
+      <p>Withdraw funds from an account.</p>
+    </div>
+    <div class="card" style="max-width:480px">
+      <h2>Withdraw Funds</h2>
+      <div class="form-group">
+        <label>Account Number</label>
+        <input type="number" id="w-accno" placeholder="e.g. 1001"/>
+      </div>
+      <div class="form-group">
+        <label>Transaction ID</label>
+        <input type="number" id="w-transid" placeholder="Unique transaction ID"/>
+      </div>
+      <div class="form-group">
+        <label>Amount (₹)</label>
+        <input type="number" id="w-amount" placeholder="0.00"/>
+      </div>
+      <button class="btn btn-danger btn-full" onclick="withdraw()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+        Withdraw Amount
+      </button>
+      <div id="withdraw-alert" class="alert"></div>
+    </div>
+  </div>
+
+  <!-- TRANSFER -->
+  <div class="page" id="page-transfer">
+    <div class="page-header">
+      <h1>Transfer</h1>
+      <p>Send money between accounts.</p>
+    </div>
+    <div class="card" style="max-width:480px">
+      <h2>Fund Transfer</h2>
+      <div class="form-group">
+        <label>Sender Account No.</label>
+        <input type="number" id="t-sender" placeholder="e.g. 1001"/>
+      </div>
+      <div class="form-group">
+        <label>Receiver Account No.</label>
+        <input type="number" id="t-receiver" placeholder="e.g. 1002"/>
+      </div>
+      <div class="form-group">
+        <label>Amount (₹)</label>
+        <input type="number" id="t-amount" placeholder="0.00"/>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="transfer()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M15 8l4 4-4 4M9 16l-4-4 4-4"/></svg>
+        Transfer Funds
+      </button>
+      <div id="transfer-alert" class="alert"></div>
+    </div>
+  </div>
+
+  <!-- BALANCE -->
+  <div class="page" id="page-balance">
+    <div class="page-header">
+      <h1>Balance Check</h1>
+      <p>View current balance for any account.</p>
+    </div>
+    <div class="card" style="max-width:480px">
+      <h2>Check Balance</h2>
+      <div class="form-group">
+        <label>Account Number</label>
+        <input type="number" id="b-accno" placeholder="e.g. 1001"/>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="checkBalance()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Check Balance
+      </button>
+      <div id="balance-result" style="display:none">
+        <div class="balance-big" style="margin-top:20px">
+          <div class="acc" id="balance-acc-label"></div>
+          <div class="amount" id="balance-amount"></div>
+          <div style="font-size:12px;color:#7a8099;margin-top:8px">Current Available Balance</div>
+        </div>
+      </div>
+      <div id="balance-alert" class="alert"></div>
+    </div>
+  </div>
+
+  <!-- TRANSACTIONS -->
+  <div class="page" id="page-transactions">
+    <div class="page-header">
+      <h1>Transaction History</h1>
+      <p>View complete statement for an account.</p>
+    </div>
+    <div class="card">
+      <h2>Account Statement</h2>
+      <div style="display:flex;gap:12px;margin-bottom:20px">
+        <input type="number" id="tx-accno" placeholder="Enter Account Number" style="flex:1;background:#0a0c10;border:1px solid #252830;border-radius:10px;padding:12px 16px;color:#f0f2f8;font-size:14px;outline:none;"/>
+        <button class="btn btn-primary" onclick="getTransactions()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Fetch
+        </button>
+      </div>
+      <div id="tx-result">
+        <div class="loading">Enter an account number to view transactions.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATE ACCOUNT -->
+  <div class="page" id="page-update">
+    <div class="page-header">
+      <h1>Update Account</h1>
+      <p>Modify account contact details.</p>
+    </div>
+    <div class="card" style="max-width:520px">
+      <h2>Edit Account Info</h2>
+      <div class="form-group">
+        <label>Account Number</label>
+        <input type="number" id="u-accno" placeholder="e.g. 1001"/>
+      </div>
+      <div class="form-group">
+        <label>New Address</label>
+        <input type="text" id="u-address" placeholder="Updated address"/>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>New Phone</label>
+          <input type="text" id="u-phone" placeholder="+91 99999 00000"/>
+        </div>
+        <div class="form-group">
+          <label>New Email</label>
+          <input type="email" id="u-email" placeholder="new@email.com"/>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="updateAccount()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Update Account
+      </button>
+      <div id="update-alert" class="alert"></div>
+    </div>
+  </div>
+
+  <!-- DELETE ACCOUNT -->
+  <div class="page" id="page-delete">
+    <div class="page-header">
+      <h1>Delete Account</h1>
+      <p>Permanently remove an account. This cannot be undone.</p>
+    </div>
+    <div class="card" style="max-width:480px;border-color:#ff4f4f30">
+      <h2 style="color:#ff4f4f">⚠ Danger Zone</h2>
+      <div class="form-group">
+        <label>Account Number</label>
+        <input type="number" id="del-accno" placeholder="Enter account number to delete"/>
+      </div>
+      <div style="background:#ff4f4f0a;border:1px solid #ff4f4f25;border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:#ff8080">
+        Warning: Deleting an account will permanently remove all associated data. This action cannot be reversed.
+      </div>
+      <button class="btn btn-danger btn-full" onclick="deleteAccount()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Delete Account
+      </button>
+      <div id="delete-alert" class="alert"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const BASE_URL_KEY = 'nexbank_api_url';
+  let API_BASE = localStorage.getItem(BASE_URL_KEY) || 'http://localhost:5000';
+  document.getElementById('api-url-display').textContent = API_BASE;
+
+  function setApiUrl() {
+    const val = document.getElementById('api-base-input').value.trim();
+    if (val) {
+      API_BASE = val.replace(/\/$/, '');
+      localStorage.setItem(BASE_URL_KEY, API_BASE);
+      document.getElementById('api-url-display').textContent = API_BASE;
+      document.getElementById('api-base-input').value = '';
+      showAlert(null, null, true);
+    }
+  }
+
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.querySelector(`nav a[data-page="${name}"]`).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function showAlert(id, msg, clear = false) {
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (clear) { el.className = 'alert'; return; }
+    el.className = 'alert ' + (msg.ok ? 'success' : 'error');
+    el.textContent = msg.text;
+  }
+
+  async function apiCall(method, path, body = null) {
+    const opts = {
+      method,
+      headers: { 'Content-Type': 'application/json' }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    try {
+      const res = await fetch(API_BASE + path, opts);
+      const data = await res.json();
+      return { ok: res.ok, data };
+    } catch (e) {
+      return { ok: false, data: { message: 'Connection failed. Is the Flask server running?' } };
+    }
+  }
+
+  async function createAccount() {
+    const acc_no = +document.getElementById('c-accno').value;
+    const name = document.getElementById('c-name').value.trim();
+    const address = document.getElementById('c-address').value.trim();
+    const phone = document.getElementById('c-phone').value.trim();
+    const email = document.getElementById('c-email').value.trim();
+    const balance = +document.getElementById('c-balance').value;
+    if (!acc_no || !name || !address || !phone || !email) {
+      return showAlert('create-alert', { ok: false, text: 'Please fill all required fields.' });
+    }
+    const r = await apiCall('POST', '/create_account', { acc_no, name, address, phone, email, balance });
+    showAlert('create-alert', { ok: r.ok, text: r.data.message || (r.ok ? 'Account created!' : 'Error occurred.') });
+  }
+
+  async function deposit() {
+    const acc_no = +document.getElementById('d-accno').value;
+    const trans_id = +document.getElementById('d-transid').value;
+    const amount = +document.getElementById('d-amount').value;
+    if (!acc_no || !trans_id || !amount) return showAlert('deposit-alert', { ok: false, text: 'All fields are required.' });
+    const r = await apiCall('POST', '/deposit', { acc_no, trans_id, amount });
+    showAlert('deposit-alert', { ok: r.ok, text: r.data.message || (r.ok ? 'Deposited!' : 'Error.') });
+  }
+
+  async function withdraw() {
+    const acc_no = +document.getElementById('w-accno').value;
+    const trans_id = +document.getElementById('w-transid').value;
+    const amount = +document.getElementById('w-amount').value;
+    if (!acc_no || !trans_id || !amount) return showAlert('withdraw-alert', { ok: false, text: 'All fields are required.' });
+    const r = await apiCall('POST', '/withdraw', { acc_no, trans_id, amount });
+    showAlert('withdraw-alert', { ok: r.ok, text: r.data.message || (r.ok ? 'Withdrawn!' : 'Error.') });
+  }
+
+  async function transfer() {
+    const sender = +document.getElementById('t-sender').value;
+    const receiver = +document.getElementById('t-receiver').value;
+    const amount = +document.getElementById('t-amount').value;
+    if (!sender || !receiver || !amount) return showAlert('transfer-alert', { ok: false, text: 'All fields are required.' });
+    if (sender === receiver) return showAlert('transfer-alert', { ok: false, text: 'Sender and receiver cannot be the same.' });
+    const r = await apiCall('POST', '/transfer', { sender, receiver, amount });
+    showAlert('transfer-alert', { ok: r.ok, text: r.data.message || (r.ok ? 'Transfer done!' : 'Error.') });
+  }
+
+  async function checkBalance() {
+    const acc_no = +document.getElementById('b-accno').value;
+    if (!acc_no) return showAlert('balance-alert', { ok: false, text: 'Enter an account number.' });
+    document.getElementById('balance-result').style.display = 'none';
+    showAlert('balance-alert', null, true);
+    const r = await apiCall('GET', '/balance/' + acc_no);
+    if (r.ok && r.data.balance !== undefined) {
+      document.getElementById('balance-acc-label').textContent = 'Account #' + acc_no;
+      document.getElementById('balance-amount').textContent = '₹' + Number(r.data.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      document.getElementById('balance-result').style.display = 'block';
+    } else {
+      showAlert('balance-alert', { ok: false, text: r.data.message || 'Account not found.' });
+    }
+  }
+
+  async function dashBalance() {
+    const acc_no = +document.getElementById('dash-acc').value;
+    if (!acc_no) return;
+    const r = await apiCall('GET', '/balance/' + acc_no);
+    const el = document.getElementById('dash-balance');
+    if (r.ok && r.data.balance !== undefined) {
+      el.textContent = '₹' + Number(r.data.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    } else {
+      el.textContent = 'Not found';
+      el.style.fontSize = '14px';
+      el.style.color = '#ff4f4f';
+    }
+  }
+
+  async function getTransactions() {
+    const acc_no = +document.getElementById('tx-accno').value;
+    if (!acc_no) return;
+    const container = document.getElementById('tx-result');
+    container.innerHTML = '<div class="loading">Loading transactions...</div>';
+    const r = await apiCall('GET', '/transactions/' + acc_no);
+    if (!r.ok || !Array.isArray(r.data) || r.data.length === 0) {
+      container.innerHTML = '<div class="loading" style="color:#ff4f4f">No transactions found for this account.</div>';
+      return;
+    }
+    let html = '<table class="tx-table"><thead><tr><th>Trans ID</th><th>Account No</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead><tbody>';
+    r.data.forEach(row => {
+      const [trans_id, acc, type, amount, date] = row;
+      const badge = `<span class="badge ${type?.toLowerCase()}">${type}</span>`;
+      const amt = '₹' + Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      html += `<tr><td>#${trans_id}</td><td>${acc}</td><td>${badge}</td><td style="font-weight:500">${amt}</td><td style="color:#7a8099">${date || '—'}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  async function updateAccount() {
+    const acc_no = +document.getElementById('u-accno').value;
+    const address = document.getElementById('u-address').value.trim();
+    const phone = document.getElementById('u-phone').value.trim();
+    const email = document.getElementById('u-email').value.trim();
+    if (!acc_no || !address || !phone || !email) return showAlert('update-alert', { ok: false, text: 'All fields are required.' });
+    const r = await apiCall('PUT', '/update_account', { acc_no, address, phone, email });
+    showAlert('update-alert', { ok: r.ok, text: r.data.message || (r.ok ? 'Updated!' : 'Error.') });
+  }
+
+  async function deleteAccount() {
+    const acc_no = +document.getElementById('del-accno').value;
+    if (!acc_no) return showAlert('delete-alert', { ok: false, text: 'Enter account number.' });
+    const confirmed = window.confirm(`Are you sure you want to permanently delete Account #${acc_no}?`);
+    if (!confirmed) return;
+    const r = await apiCall('DELETE', '/delete_account/' + acc_no);
+    showAlert('delete-alert', { ok: r.ok, text: r.data.message || (r.ok ? 'Account deleted.' : 'Error.') });
+    if (r.ok) document.getElementById('del-accno').value = '';
+  }
+</script>
+</body>
+</html>
