@@ -231,18 +231,35 @@ def delete_account(acc_no):
 
     try:
 
-        sql = """
-        DELETE FROM Acco
+        # Delete transactions first (child table)
+        transaction_sql = """
+        DELETE FROM TRA
         WHERE acc_no = :1
         """
 
-        cursor.execute(sql, [acc_no])
+        cursor.execute(transaction_sql, [acc_no])
+
+        # Delete account next (parent table)
+        account_sql = """
+        DELETE FROM ACCO
+        WHERE acc_no = :1
+        """
+
+        cursor.execute(account_sql, [acc_no])
+
+        # Check whether account existed
+        if cursor.rowcount == 0:
+            connection.rollback()
+
+            return jsonify({
+                "message": "Account not found"
+            }), 404
 
         connection.commit()
 
         return jsonify({
             "message": "Account Deleted"
-        })
+        }), 200
 
     except Exception as e:
 
@@ -250,7 +267,7 @@ def delete_account(acc_no):
 
         return jsonify({
             "error": str(e)
-        })
+        }), 500
 #main method
 if __name__ == '__main__':
     app.run(debug=True)
